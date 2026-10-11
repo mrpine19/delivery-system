@@ -1,4 +1,4 @@
-package com.br.orderservice.service;
+package com.br.orderservice.exception;
 
 public class DishNotFoundException extends RuntimeException {
 

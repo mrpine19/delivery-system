@@ -1,5 +1,6 @@
 package com.br.orderservice.service;
 
+import com.br.orderservice.exception.DishNotFoundException;
 import com.br.orderservice.model.Dish;
 import com.br.orderservice.repository.DishRepository;
 import org.springframework.stereotype.Service;
