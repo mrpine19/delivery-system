@@ -1,9 +1,6 @@
 package com.br.orderservice.service;
 
-import com.br.orderservice.exception.DishNotFoundException;
-import com.br.orderservice.exception.InvalidQuantityException;
-import com.br.orderservice.exception.OrderNotFoundException;
-import com.br.orderservice.exception.OutOfStockException;
+import com.br.orderservice.exception.*;
 import com.br.orderservice.model.CustomerOrder;
 import com.br.orderservice.model.Dish;
 import com.br.orderservice.model.OrderStatus;
@@ -19,10 +16,12 @@ import java.math.RoundingMode;
 public class CustomerOrderService {
     private final CustomerOrderRepository customerOrderRepository;
     private final DishRepository dishRepository;
+    private final PaymentClient paymentClient;
 
-    public CustomerOrderService(CustomerOrderRepository customerOrderRepository, DishRepository dishRepository) {
+    public CustomerOrderService(CustomerOrderRepository customerOrderRepository, DishRepository dishRepository, PaymentClient paymentClient) {
         this.customerOrderRepository = customerOrderRepository;
         this.dishRepository = dishRepository;
+        this.paymentClient = paymentClient;
     }
 
     @Transactional
@@ -40,6 +39,12 @@ public class CustomerOrderService {
         BigDecimal total = dish.getPrice()
                 .multiply(BigDecimal.valueOf(quantity))
                 .setScale(2, RoundingMode.HALF_UP);
+
+        try {
+            paymentClient.pay(total);
+        } catch (RuntimeException e) {
+            throw new PaymentUnavailableException();
+        }
 
         dish.setStock(dish.getStock() - quantity);
         return customerOrderRepository.save(new CustomerOrder(dishId, quantity, total, OrderStatus.CONFIRMED));
