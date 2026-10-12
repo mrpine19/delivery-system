@@ -1,6 +1,7 @@
 package com.br.reviewservice.service;
 
 import com.br.reviewservice.config.RabbitConfig;
+import com.br.reviewservice.controller.ReviewSummaryController;
 import com.br.reviewservice.model.ReviewSummary;
 import com.br.reviewservice.repository.ReviewSummaryRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +9,10 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -51,10 +56,29 @@ public class ReviewSummaryService {
 
         ReviewSummary summary = reviewSummaryRepository.findById(dishId)
                 .orElseGet(() -> new ReviewSummary(dishId, acc.dishName(), 0, 0));
-        summary.setRatingSum(summary.getRatingSum() + acc.ratingSum());
         summary.setCount(summary.getCount() + acc.count());
+        summary.setRatingSum(summary.getRatingSum() + acc.ratingSum());
         reviewSummaryRepository.save(summary);
 
         log.info("Processed review summary for dishId: {}, total reviews: {}", dishId, acc.count());
+    }
+
+    public List<ReviewSummaryController.RankingResponse> getRanking() {
+        return reviewSummaryRepository.findAll().stream()
+                .map(s -> new ReviewSummaryController.RankingResponse(
+                        s.getDishId(),
+                        s.getDishName(),
+                        average(s.getRatingSum(), s.getCount()),
+                        s.getCount()))
+                .sorted(Comparator
+                        .comparingDouble(ReviewSummaryController.RankingResponse::average).reversed()
+                        .thenComparing(Comparator.comparingInt(ReviewSummaryController.RankingResponse::count).reversed()))
+                .toList();
+    }
+
+    private double average(int ratingSum, int count) {
+        return BigDecimal.valueOf(ratingSum)
+                .divide(BigDecimal.valueOf(count), 1, RoundingMode.HALF_UP)
+                .doubleValue();
     }
 }
