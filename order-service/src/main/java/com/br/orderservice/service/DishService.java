@@ -24,4 +24,8 @@ public class DishService {
         return dishRepository.findById(id)
                 .orElseThrow(() -> new DishNotFoundException(id));
     }
+
+    public List<Dish> findAllDishes() {
+        return dishRepository.findAll();
+    }
 }
