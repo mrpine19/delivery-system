@@ -1,6 +1,7 @@
 package com.br.orderservice.controller;
 
 import com.br.orderservice.service.ChatService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +24,7 @@ public class AssistantController {
     public record AssistantResponse(String answer){}
 
     @PostMapping
-    public AssistantResponse AS(@RequestBody AssistantRequest request) {
+    public AssistantResponse ask(@RequestBody @Valid AssistantRequest request) {
         return new AssistantResponse(chatService.getAnswer(request.question));
     }
 }

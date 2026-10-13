@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitConfig {
     public static final String REVIEW_QUEUE = "reviews.queue";
     public static final String EXCHANGE = "delivery.exchange";
-    public static final String REVIEWS_ROUTING_KEY = "review.new";
+    public static final String REVIEWS_ROUTING_KEY = "reviews.new";
 
     // queue
     @Bean
