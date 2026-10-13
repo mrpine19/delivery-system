@@ -1,6 +1,6 @@
 package com.br.orderservice.controller;
 
-import com.br.orderservice.model.Dish;
+import com.br.orderservice.dto.response.DishResponse;
 import com.br.orderservice.service.DishService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,12 +20,14 @@ public class DishController {
     }
 
     @GetMapping
-    public List<Dish> getAllDishes() {
-        return dishService.findAll();
+    public List<DishResponse> getAllDishes() {
+        return dishService.findAll().stream()
+                .map(DishResponse::from)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public Dish getDishById(@PathVariable Long id) {
-        return dishService.findById(id);
+    public DishResponse getDishById(@PathVariable Long id) {
+        return DishResponse.from(dishService.findById(id));
     }
 }
