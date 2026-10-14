@@ -1,6 +1,7 @@
 package com.br.orderservice.controller;
 
 import com.br.orderservice.dto.response.CustomerOrderResponse;
+import com.br.orderservice.interceptor.RateLimited;
 import com.br.orderservice.service.CustomerOrderService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -30,6 +31,7 @@ public class CustomerOrderController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @RateLimited(requestsPerSecond = 20)
     public CustomerOrderResponse createOrder(@RequestBody @Valid CreateOrderRequest request) {
         return CustomerOrderResponse.from(
                 customerOrderService.createOrder(request.dishId(), request.quantity()));
